@@ -212,7 +212,14 @@ protected:
         }
 
         // Draw info
-        system("cls");
+        #ifdef _WIN32
+                system("cls");
+        #endif
+
+        #ifdef __linux__
+                system("clear");
+        #endif
+
         printf("X = %3.2f, Y = %3.2f\n", m_fPlayerX, m_fPlayerY);
 
         return true;
