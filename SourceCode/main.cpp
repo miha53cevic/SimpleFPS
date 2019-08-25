@@ -30,15 +30,15 @@ private:
 
     float m_fSpeed;
 
+    sf::RectangleShape m_pixel;
+
 private:
     void DrawPixel(int x, int y, sf::Color c)
     {
-        sf::RectangleShape pixel;
-        pixel.setPosition(x, y);
-        pixel.setSize({ m_fPixelSizeX, m_fPixelSizeY });
-        pixel.setFillColor(c);
+        m_pixel.setPosition(x, y);
+        m_pixel.setFillColor(c);
 
-        Draw(pixel);
+        Draw(m_pixel);
     }
 
 protected:
@@ -74,8 +74,8 @@ protected:
         m_nMapHeight    = 16;
 
         // User window size
-        m_nScreenWidth  = 120;
-        m_nScreenHeight = 40;
+        m_nScreenWidth  = 320;
+        m_nScreenHeight = 240;
 
         // Player position and player looking angle
         m_fPlayerX      = 8.0f;
@@ -83,7 +83,7 @@ protected:
         m_fPlayerAngle  = 0.0f;
 
         // Field of view = 90 degrees
-        m_fFOV          = M_PI / 2.0f;
+        m_fFOV          = M_PI / 4.0f;
 
         // Max distance to wall
         m_fDepth        = 16.0f;
@@ -91,6 +91,8 @@ protected:
         // set Pixel Size
         m_fPixelSizeX = (float)ScreenWidth() / (float)m_nScreenWidth;
         m_fPixelSizeY = (float)ScreenHeight() / (float)m_nScreenHeight;
+
+        m_pixel.setSize({ m_fPixelSizeX, m_fPixelSizeY });
 
         // Player move and rotation speed
         m_fSpeed = 5.0f;
@@ -197,6 +199,7 @@ protected:
                 if (y <= nCeiling)
                 {
                     // Draw ceiling
+                    DrawPixel(x * m_fPixelSizeX, y * m_fPixelSizeY, sf::Color(21, 234, 237));
                 }
                 else if (y > nCeiling && y <= nFloor)
                 {
@@ -206,7 +209,7 @@ protected:
                 else
                 {
                     // Draw floor
-                    DrawPixel(x * m_fPixelSizeX, y * m_fPixelSizeY, sf::Color(51, 51, 51));
+                    DrawPixel(x * m_fPixelSizeX, y * m_fPixelSizeY, sf::Color(19, 148, 39));
                 }
             }
         }
@@ -221,6 +224,7 @@ protected:
         #endif
 
         printf("X = %3.2f, Y = %3.2f\n", m_fPlayerX, m_fPlayerY);
+        printf("FPS: %3.2f\n", 1.0f / elapsed.asSeconds());
 
         return true;
     }
