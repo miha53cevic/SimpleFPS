@@ -1,6 +1,5 @@
 #include "mihaSimpleSFML.h"
 
-#define _USE_MATH_DEFINES
 #include <math.h>
 #include <stdio.h>
 
@@ -30,15 +29,18 @@ private:
 
     float m_fSpeed;
 
-    sf::RectangleShape m_pixel;
+    sf::VertexArray m_quads;
 
 private:
-    void DrawPixel(int x, int y, sf::Color c)
+    void DrawPixel(int index, sf::Color c)
     {
-        m_pixel.setPosition(x, y);
-        m_pixel.setFillColor(c);
-
-        Draw(m_pixel);
+        // Each quad is has 4 vertices so we have to move the index with * 4 to get the
+        // first vertex of a quad, then we go through all 4 of the vertices and change their
+        // colour to the one requested
+        for (int i = 0; i < 4; i++)
+        {
+            m_quads[index * 4 + i].color = c;
+        }
     }
 
 protected:
@@ -49,29 +51,32 @@ protected:
 protected:
     bool OnUserCreate() override
     {
+        // Show FPS Counter
+        EnableFPSCounter(true);
+
         // Create map where # represents a wall and . represends free space
-        m_map += "################";
-        m_map += "#..............#";
-        m_map += "#..............#";
-        m_map += "#######........#";
-        m_map += "#..............#";
-        m_map += "#..............#";
-        m_map += "#..............#";
-        m_map += "#..............#";
-        m_map += "#..........#####";
-        m_map += "#..............#";
-        m_map += "#..............#";
-        m_map += "#....#.........#";
-        m_map += "#..............#";
-        m_map += "#..............#";
-        m_map += "#..............#";
-        m_map += "################";
+        m_map += "################################";
+        m_map += "#..............#...............#";
+        m_map += "#..............#...............#";
+        m_map += "#######........#...####........#";
+        m_map += "#..............#...............#";
+        m_map += "#..............................#";
+        m_map += "#..............................#";
+        m_map += "#..............................#";
+        m_map += "#..........#####...........#####";
+        m_map += "#..............#...............#";
+        m_map += "#..............#...............#";
+        m_map += "#....#.........#...............#";
+        m_map += "#..............#...............#";
+        m_map += "#..............................#";
+        m_map += "#..............................#";
+        m_map += "################################";
 
         printf("Map Size: %d\n", m_map.size());
 
         // Map size
-        m_nMapWidth     = 16;
-        m_nMapHeight    = 16;
+        m_nMapWidth     = 32;
+        m_nMapHeight    = 32;
 
         // User window size
         m_nScreenWidth  = 320;
@@ -83,19 +88,37 @@ protected:
         m_fPlayerAngle  = 0.0f;
 
         // Field of view = 90 degrees
-        m_fFOV          = M_PI / 4.0f;
+        m_fFOV          = PI / 4.0f;
 
         // Max distance to wall
-        m_fDepth        = 16.0f;
+        m_fDepth        = 32.0f;
 
         // set Pixel Size
         m_fPixelSizeX = (float)ScreenWidth() / (float)m_nScreenWidth;
         m_fPixelSizeY = (float)ScreenHeight() / (float)m_nScreenHeight;
 
-        m_pixel.setSize({ m_fPixelSizeX, m_fPixelSizeY });
-
         // Player move and rotation speed
         m_fSpeed = 5.0f;
+
+        // Set primitive type
+        m_quads.setPrimitiveType(sf::Quads);
+
+        // Setup QUADS location and size
+        for (int y = 0; y < m_nScreenHeight; y++)
+        {
+            for (int x = 0; x < m_nScreenWidth; x++)
+            {
+                // Upscaled coordinates
+                float sx = x * m_fPixelSizeX;
+                float sy = y * m_fPixelSizeY;
+
+                // Append vertices in a clock-wise or counter-clock-wise order
+                m_quads.append(sf::Vertex(sf::Vector2f(sx, sy), sf::Color::Black));
+                m_quads.append(sf::Vertex(sf::Vector2f(sx + m_fPixelSizeX, sy), sf::Color::Black));
+                m_quads.append(sf::Vertex(sf::Vector2f(sx + m_fPixelSizeX, sy + m_fPixelSizeY), sf::Color::Black));
+                m_quads.append(sf::Vertex(sf::Vector2f(sx, sy + m_fPixelSizeY), sf::Color::Black));
+            }
+        }
 
         return true;
     }
@@ -199,32 +222,25 @@ protected:
                 if (y <= nCeiling)
                 {
                     // Draw ceiling
-                    DrawPixel(x * m_fPixelSizeX, y * m_fPixelSizeY, sf::Color(21, 234, 237));
+                    DrawPixel((y * m_nScreenWidth) + x, sf::Color(21, 234, 237));
                 }
                 else if (y > nCeiling && y <= nFloor)
                 {
                     // Draw wall
-                    DrawPixel(x * m_fPixelSizeX, y * m_fPixelSizeY, sf::Color(fShade, fShade, fShade));
+                    DrawPixel((y * m_nScreenWidth) + x, sf::Color(fShade, fShade, fShade));
                 }
                 else
                 {
                     // Draw floor
-                    DrawPixel(x * m_fPixelSizeX, y * m_fPixelSizeY, sf::Color(19, 148, 39));
+                    DrawPixel((y * m_nScreenWidth) + x, sf::Color(19, 148, 39));
                 }
             }
         }
 
-        // Draw info
-        #ifdef _WIN32
-                system("cls");
-        #endif
-
-        #ifdef __linux__
-                system("clear");
-        #endif
-
-        printf("X = %3.2f, Y = %3.2f\n", m_fPlayerX, m_fPlayerY);
-        printf("FPS: %3.2f\n", 1.0f / elapsed.asSeconds());
+        // Draw VertexArray of QUADS
+        // Calling draw only once per frame gives a huge boost in FPS
+        // instead of doing a ton of draw calls with sf::RectangleShape
+        Draw(m_quads);
 
         return true;
     }
