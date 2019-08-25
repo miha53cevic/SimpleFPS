@@ -94,8 +94,9 @@ public:
         m_nScreenWidth = 640;
         m_nScreenHeight = 480;
 
-        m_bVSync = false;
-        m_bDone = false;
+        m_bVSync    = false;
+        m_bDone     = false;
+        m_bDrawFPS  = false;
 
         m_backgroundColor = sf::Color::Black;
     }
@@ -113,6 +114,8 @@ public:
 
     void EnableVSync(bool l_vsync) { m_bVSync = l_vsync; m_window.setVerticalSyncEnabled(m_bVSync); }
     bool IsVSyncOn() { return m_bVSync; }
+
+    void EnableFPSCounter(bool l_fps) { m_bDrawFPS = l_fps; }
 
     sf::RenderWindow* getWindow() { return &m_window; }
 
@@ -134,6 +137,7 @@ private:
 
     bool m_bVSync;
     bool m_bDone;
+    bool m_bDrawFPS;
 
     sf::Clock m_clock;
     sf::Time m_elapsed;
@@ -178,6 +182,9 @@ public:
             EndDraw();
 
             m_elapsed = m_clock.restart();
+
+            if (m_bDrawFPS)
+                m_window.setTitle(m_sAppName + L" - FPS: " + std::to_wstring(1.0f / m_elapsed.asSeconds()));
         }
     }
 };
