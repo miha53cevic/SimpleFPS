@@ -72,7 +72,7 @@ protected:
         m_map += "#..............................#";
         m_map += "################################";
 
-        printf("Map Size: %d\n", m_map.size());
+        printf("Map Size: %d\n", (int)m_map.size());
 
         // Map size
         m_nMapWidth     = 32;
