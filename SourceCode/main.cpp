@@ -72,7 +72,7 @@ protected:
         m_map += "#..............................#";
         m_map += "################################";
 
-        printf("Map Size: %d\n", (int)m_map.size());
+        printf("Map Size: %d\n", m_map.size());
 
         // Map size
         m_nMapWidth     = 32;
@@ -88,7 +88,7 @@ protected:
         m_fPlayerAngle  = 0.0f;
 
         // Field of view = 90 degrees
-        m_fFOV          = PI / 4.0f;
+        m_fFOV          = PI / 2.0f;
 
         // Max distance to wall
         m_fDepth        = 32.0f;
